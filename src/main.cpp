@@ -22,6 +22,7 @@ bool direction_state = false; // Direction: CCW
 
 // Function prototype
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4);
+void StopMotor(int IN1, int IN2, int IN3, int IN4);
 void direction_callback(void);
 void on_off_callback(void);
 
@@ -48,11 +49,15 @@ void setup() {
 }
 
 void loop() {
-  Serial.print("System State: ");
-  Serial.print(system_state ? "ON  |" : "OFF  |");
-  Serial.print(" Direction: ");
-  Serial.println(direction_state ? "CW" : "CCW");
-  delay(20);
+  // Check if the system is ON
+  if (system_state) {
+    // Perform one step in the selected direction
+    OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+    delay(3);
+  } else {
+    Serial.println("System is OFF");
+    StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+  }
 }
 
 // Functions
@@ -66,6 +71,14 @@ void on_off_callback(void) {
 void direction_callback(void) {
   delay(20); // Debounce delay
   direction_state = !direction_state; // Toggle direction state
+}
+
+// Funtion to stop the motor
+void StopMotor(int IN1, int IN2, int IN3, int IN4) {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
 }
 
 // Function to perform one step of the stepper motor
