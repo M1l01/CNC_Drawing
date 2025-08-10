@@ -56,11 +56,13 @@ void loop() {
     delay(3);
   } else {
     Serial.println("System is OFF");
-    StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+    StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
+    StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
 }
 
-// Functions
+// ********************* Functions *********************
+
 // Callback function to change the state of the system (on/off)
 void on_off_callback(void) {
   delay(20); // Debounce delay
