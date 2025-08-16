@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Servo.h>
 
 // Motor 1 control pins
 #define Module1_IN1 4
@@ -8,9 +9,9 @@
 
 // Motor 2 control pins
 #define Module2_IN1 8
-#define Module2_IN2 9
-#define Module2_IN3 10
-#define Module2_IN4 11
+#define Module2_IN2 10
+#define Module2_IN3 11
+#define Module2_IN4 12
 
 // Control de Sentido
 #define BTN_DIR 2
@@ -19,6 +20,10 @@
 int step = 0;
 bool system_state = false; // System state: off
 bool direction_state = false; // Direction: CCW
+
+// Define Servo Motor
+Servo ServoSketcher;
+
 
 // Function prototype
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4);
@@ -43,12 +48,22 @@ void setup() {
     pinMode(BTN_DIR, INPUT);
     pinMode(BTN_ON_OFF, INPUT);
 
+    // Configure the pin for the Servo motor
+    ServoSketcher.attach(9); // Attach the servo to pin 9
+    ServoSketcher.write(0); // Initialize servo position to 0 degrees
+
     // Configuration of interrupts pins
     attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
     attachInterrupt(digitalPinToInterrupt(BTN_ON_OFF), on_off_callback, RISING);
 }
 
 void loop() {
+  // put Servo in 180 degrees position
+  ServoSketcher.write(180);
+  delay(1000); // Wait for the servo to reach the position
+  ServoSketcher.write(0);
+  delay(1000); // Wait for the servo to reach the position
+  /*
   // Check if the system is ON
   if (system_state) {
     // Perform one step in the selected direction
@@ -59,6 +74,7 @@ void loop() {
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
+  */
 }
 
 // ********************* Functions *********************
