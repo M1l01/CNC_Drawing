@@ -24,7 +24,6 @@ bool direction_state = false; // Direction: CCW
 // Define Servo Motor
 Servo ServoSketcher;
 
-
 // Function prototype
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4);
 void StopMotor(int IN1, int IN2, int IN3, int IN4);
@@ -50,7 +49,7 @@ void setup() {
 
     // Configure the pin for the Servo motor
     ServoSketcher.attach(9); // Attach the servo to pin 9
-    ServoSketcher.write(0); // Initialize servo position to 0 degrees
+    ServoSketcher.write(70); // Initialize servo position to 0 degrees
 
     // Configuration of interrupts pins
     attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
@@ -58,12 +57,6 @@ void setup() {
 }
 
 void loop() {
-  // put Servo in 180 degrees position
-  ServoSketcher.write(180);
-  delay(1000); // Wait for the servo to reach the position
-  ServoSketcher.write(0);
-  delay(1000); // Wait for the servo to reach the position
-  /*
   // Check if the system is ON
   if (system_state) {
     // Perform one step in the selected direction
@@ -74,7 +67,6 @@ void loop() {
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
-  */
 }
 
 // ********************* Functions *********************
