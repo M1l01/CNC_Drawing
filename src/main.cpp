@@ -19,7 +19,10 @@
 
 int step = 0;
 bool system_state = false; // System state: off
-bool direction_state = false; // Direction: CCW
+bool direction_state = true; // Direction: CCW
+
+int cont_steps = 0; // Step counter
+int max_steps = 7740; // Maximum steps for a full translation (15 cm)
 
 // Define Servo Motor
 Servo ServoSketcher;
@@ -59,11 +62,15 @@ void setup() {
 void loop() {
   // Check if the system is ON
   if (system_state) {
-    // Perform one step in the selected direction
-    OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
-    delay(3);
+    if (cont_steps >= max_steps) {
+      StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+    }else{
+      // Perform one step in the selected direction
+      OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+      cont_steps++;
+      delay(3);
+    }
   } else {
-    Serial.println("System is OFF");
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
@@ -81,6 +88,8 @@ void on_off_callback(void) {
 void direction_callback(void) {
   delay(20); // Debounce delay
   direction_state = !direction_state; // Toggle direction state
+  //Serial.print("Direction state: ");
+  //Serial.println(direction_state);
 }
 
 // Funtion to stop the motor
@@ -93,6 +102,7 @@ void StopMotor(int IN1, int IN2, int IN3, int IN4) {
 
 // Function to perform one step of the stepper motor
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4) {
+  // Counter of steps and saturation
   if (dir) {
     // Advance step
     step++;
