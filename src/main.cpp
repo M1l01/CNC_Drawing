@@ -14,15 +14,19 @@
 #define Module2_IN4 12
 
 // Control de Sentido
-#define BTN_DIR 2
+//#define BTN_DIR 2
 #define BTN_ON_OFF 3
 
 int step = 0;
 bool system_state = false; // System state: off
-bool direction_state = true; // Direction: CCW
+bool direction_state = true; // Direction: CW
 
 int cont_steps = 0; // Step counter
-int max_steps = 7740; // Maximum steps for a full translation (15 cm)
+int max_steps = 7732; // Maximum steps for a full translation (15 cm)
+
+float sp_posicion = 30; // Setpoint position in mm (0-150)
+float paso_mm = 0.0194; // mm per step
+int sp_step = sp_posicion/paso_mm; // Setpoint in steps
 
 // Define Servo Motor
 Servo ServoSketcher;
@@ -30,7 +34,7 @@ Servo ServoSketcher;
 // Function prototype
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4);
 void StopMotor(int IN1, int IN2, int IN3, int IN4);
-void direction_callback(void);
+//void direction_callback(void);
 void on_off_callback(void);
 
 void setup() {
@@ -47,7 +51,7 @@ void setup() {
     pinMode(Module2_IN3, OUTPUT);
     pinMode(Module2_IN4, OUTPUT);
 
-    pinMode(BTN_DIR, INPUT);
+    //pinMode(BTN_DIR, INPUT);
     pinMode(BTN_ON_OFF, INPUT);
 
     // Configure the pin for the Servo motor
@@ -55,21 +59,49 @@ void setup() {
     ServoSketcher.write(70); // Initialize servo position to 0 degrees
 
     // Configuration of interrupts pins
-    attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
+    //attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
     attachInterrupt(digitalPinToInterrupt(BTN_ON_OFF), on_off_callback, RISING);
+
+    Serial.print("Setpoint position (steps): ");
+    Serial.println(sp_step);
 }
 
 void loop() {
   // Check if the system is ON
   if (system_state) {
-    if (cont_steps >= max_steps) {
-      StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
-    }else{
-      // Perform one step in the selected direction
-      OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
-      cont_steps++;
-      delay(3);
+
+    // Identify the direction of the movement
+    if (sp_step == cont_steps) {
+      system_state = false;
+    } else if (sp_step > cont_steps) {
+      direction_state = true; // Direction CW - Right
+    } else {
+      direction_state = false; // Direction CCW - Left
     }
+
+    // Check Saturation of steps counter
+    // Direction: CW - Right
+    if (direction_state) {
+      // Check for saturation of steps
+      if (cont_steps >= max_steps){
+        cont_steps = max_steps;
+      } else {
+        cont_steps++;
+      }
+    // Direction: CCW - Left
+    }else {
+      // Check for saturation of steps
+      if (cont_steps <= 0){
+        cont_steps = 0;
+      } else {
+        cont_steps--;
+      }
+    }
+
+    // Move the motor one step
+    OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+    delay(3);
+
   } else {
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
@@ -85,12 +117,12 @@ void on_off_callback(void) {
 }
 
 // Callback function to change the direction of the motor
-void direction_callback(void) {
+/*void direction_callback(void) {
   delay(20); // Debounce delay
   direction_state = !direction_state; // Toggle direction state
   //Serial.print("Direction state: ");
   //Serial.println(direction_state);
-}
+}*/
 
 // Funtion to stop the motor
 void StopMotor(int IN1, int IN2, int IN3, int IN4) {
