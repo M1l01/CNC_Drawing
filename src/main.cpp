@@ -24,9 +24,10 @@ bool direction_state = true; // Direction: CW
 int cont_steps = 0; // Step counter
 int max_steps = 7732; // Maximum steps for a full translation (15 cm)
 
-float sp_posicion = 30; // Setpoint position in mm (0-150)
+long valor_pot;
+float sp_posicion; // Setpoint position in mm (0-150)
 float paso_mm = 0.0194; // mm per step
-int sp_step = sp_posicion/paso_mm; // Setpoint in steps
+int sp_step;
 
 // Define Servo Motor
 Servo ServoSketcher;
@@ -67,6 +68,11 @@ void setup() {
 }
 
 void loop() {
+  // Read the potenciometer value (0-1023)
+  valor_pot = analogRead(A0);
+  sp_posicion = map(valor_pot, 0, 1023, 0, 150); // Map to range 0-150 mm
+  sp_step = sp_posicion/paso_mm; // Convert to steps
+
   // Check if the system is ON
   if (system_state) {
 
