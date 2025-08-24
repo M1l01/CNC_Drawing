@@ -57,7 +57,7 @@ void setup() {
 
     // Configure the pin for the Servo motor
     ServoSketcher.attach(9); // Attach the servo to pin 9
-    ServoSketcher.write(70); // Initialize servo position to 0 degrees
+    ServoSketcher.write(50); // Initialize servo position to 0 degrees
 
     // Configuration of interrupts pins
     //attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
@@ -103,12 +103,15 @@ void loop() {
         cont_steps--;
       }
     }
-
+    // Activar ServoSketcher
+    ServoSketcher.write(130);
     // Move the motor one step
     OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
     delay(3);
 
   } else {
+    // Desactivar ServoSketcher
+    ServoSketcher.write(50);
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
