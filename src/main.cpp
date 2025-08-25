@@ -14,7 +14,7 @@
 #define Module2_IN4 12
 
 // Control de Sentido
-//#define BTN_DIR 2
+#define FC_AXIS_X 2
 #define BTN_ON_OFF 3
 
 int step = 0;
@@ -28,6 +28,7 @@ long valor_pot;
 float sp_posicion; // Setpoint position in mm (0-150)
 float paso_mm = 0.0194; // mm per step
 int sp_step;
+int state_FC_X;
 
 // Define Servo Motor
 Servo ServoSketcher;
@@ -52,7 +53,7 @@ void setup() {
     pinMode(Module2_IN3, OUTPUT);
     pinMode(Module2_IN4, OUTPUT);
 
-    //pinMode(BTN_DIR, INPUT);
+    pinMode(FC_AXIS_X, INPUT_PULLUP);
     pinMode(BTN_ON_OFF, INPUT);
 
     // Configure the pin for the Servo motor
@@ -75,7 +76,7 @@ void loop() {
 
   // Check if the system is ON
   if (system_state) {
-
+    
     // Identify the direction of the movement
     if (sp_step == cont_steps) {
       system_state = false;
