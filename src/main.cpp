@@ -28,7 +28,9 @@ long valor_pot;
 float sp_posicion; // Setpoint position in mm (0-150)
 float paso_mm = 0.0194; // mm per step
 int sp_step;
+
 int state_FC_X;
+bool isCalibrated = false; // Calibration to zero state
 
 // Define Servo Motor
 Servo ServoSketcher;
@@ -74,40 +76,57 @@ void loop() {
   sp_posicion = map(valor_pot, 0, 1023, 0, 150); // Map to range 0-150 mm
   sp_step = sp_posicion/paso_mm; // Convert to steps
 
+  // Read the state of the limit switch
+  state_FC_X = digitalRead(FC_AXIS_X);
+
   // Check if the system is ON
   if (system_state) {
-    
-    // Identify the direction of the movement
-    if (sp_step == cont_steps) {
-      system_state = false;
-    } else if (sp_step > cont_steps) {
-      direction_state = true; // Direction CW - Right
-    } else {
-      direction_state = false; // Direction CCW - Left
-    }
 
-    // Check Saturation of steps counter
-    // Direction: CW - Right
-    if (direction_state) {
-      // Check for saturation of steps
-      if (cont_steps >= max_steps){
-        cont_steps = max_steps;
+    // Check for calibration
+    if (isCalibrated) {
+      // Identify the direction of the movement
+      if (sp_step == cont_steps) {
+        StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+      } else if (sp_step > cont_steps) {
+        direction_state = true; // Direction CW - Right
+        OneStep(true, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
       } else {
-        cont_steps++;
+        direction_state = false; // Direction CCW - Left
+        OneStep(false, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
       }
-    // Direction: CCW - Left
-    }else {
-      // Check for saturation of steps
-      if (cont_steps <= 0){
-        cont_steps = 0;
+  
+      // Check Saturation of steps counter
+      // Direction: CW - Right
+      if (direction_state) {
+        // Check for saturation of steps
+        if (cont_steps >= max_steps){
+          cont_steps = max_steps;
+        } else {
+          cont_steps++;
+        }
+      // Direction: CCW - Left
       } else {
-        cont_steps--;
+        // Check for saturation of steps
+        if (cont_steps <= 0){
+          cont_steps = 0;
+        } else {
+          cont_steps--;
+        }
+      }
+
+    } else {
+      // We must calibrate the system to the zero position
+      if (state_FC_X == LOW) {
+        // Limit switch deactivated: we are not in the zero position
+        OneStep(false, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Move CCW - Left
+      } else {
+        StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Stop the motor
+        cont_steps = 0; // Reset step counter
+        isCalibrated = true; // Calibration done
       }
     }
-    // Activar ServoSketcher
-    ServoSketcher.write(130);
-    // Move the motor one step
-    OneStep(direction_state, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+    
+    // Delay between steps - set the frequency of the motor
     delay(3);
 
   } else {
@@ -151,7 +170,7 @@ void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4) {
     if (step > 3) {
       step = 0;
     }
-  }else {
+  } else {
     // Reverse step
     step--;
     if (step < 0) {
