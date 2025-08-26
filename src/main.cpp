@@ -38,7 +38,6 @@ Servo ServoSketcher;
 // Function prototype
 void OneStep(bool dir, int IN1, int IN2, int IN3, int IN4);
 void StopMotor(int IN1, int IN2, int IN3, int IN4);
-//void direction_callback(void);
 void on_off_callback(void);
 
 void setup() {
