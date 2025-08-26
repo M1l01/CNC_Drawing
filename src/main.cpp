@@ -86,7 +86,6 @@ void loop() {
       // Identify the direction of the movement
       if (sp_step == cont_steps) {
         system_state = false; // Turn off the system when the position is reached
-        isCalibrated = false; // Require recalibration on next activation
       } else if (sp_step > cont_steps) {
         direction_state = true; // Direction CW - Right
         OneStep(true, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
