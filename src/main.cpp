@@ -55,7 +55,7 @@ void setup() {
     pinMode(Module2_IN3, OUTPUT);
     pinMode(Module2_IN4, OUTPUT);
 
-    pinMode(FC_AXIS_X, INPUT_PULLUP);
+    pinMode(FC_AXIS_X, INPUT);
     pinMode(BTN_ON_OFF, INPUT);
 
     // Configure the pin for the Servo motor
@@ -86,11 +86,12 @@ void loop() {
     if (isCalibrated) {
       // Identify the direction of the movement
       if (sp_step == cont_steps) {
-        StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+        system_state = false; // Turn off the system when the position is reached
+        isCalibrated = false; // Require recalibration on next activation
       } else if (sp_step > cont_steps) {
         direction_state = true; // Direction CW - Right
         OneStep(true, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
-      } else {
+      } else if (sp_step < cont_steps) {
         direction_state = false; // Direction CCW - Left
         OneStep(false, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
       }
