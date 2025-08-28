@@ -29,6 +29,9 @@ float sp_posicion; // Setpoint position in mm (0-150)
 float paso_mm = 0.0194; // mm per step
 int sp_step;
 
+int pos_pen_up = 20; // Servo position for pen up
+int pos_pen_down = 45; // Servo position for pen down
+
 int state_FC_X;
 bool isCalibrated = false; // Calibration to zero state
 
@@ -59,7 +62,7 @@ void setup() {
 
     // Configure the pin for the Servo motor
     ServoSketcher.attach(9); // Attach the servo to pin 9
-    ServoSketcher.write(50); // Initialize servo position to 0 degrees
+    ServoSketcher.write(pos_pen_down); // Initialize servo position to 0 degrees
 
     // Configuration of interrupts pins
     //attachInterrupt(digitalPinToInterrupt(BTN_DIR), direction_callback, RISING);
@@ -85,13 +88,31 @@ void loop() {
     if (isCalibrated) {
       // Identify the direction of the movement
       if (sp_step == cont_steps) {
+        
         system_state = false; // Turn off the system when the position is reached
+        ServoSketcher.write(pos_pen_up);
+        /*
+        ServoSketcher.write(pos_pen_down); // Set servo to 50 degrees (pen down)
+        delay(500);
+        ServoSketcher.write(pos_pen_up); // Set servo to 0 degrees (pen up)
+
+        sp_posicion += 10; // Recorremos 10 mm mas para proxima prueba
+        pos_pen_down -= 1; // Subimos 1 grado la posicion del servo para bajar el lapiz
+
+        if (sp_posicion >= 150) {
+          sp_posicion = 150; // Reset to 0 mm if exceeding 150 mm
+        }*/
+
       } else if (sp_step > cont_steps) {
+        
         direction_state = true; // Direction CW - Right
         OneStep(true, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+
       } else if (sp_step < cont_steps) {
+        
         direction_state = false; // Direction CCW - Left
         OneStep(false, Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4);
+
       }
   
       // Check Saturation of steps counter
@@ -129,8 +150,6 @@ void loop() {
     delay(3);
 
   } else {
-    // Desactivar ServoSketcher
-    ServoSketcher.write(50);
     StopMotor(Module1_IN1, Module1_IN2, Module1_IN3, Module1_IN4); // Ensure Motor 1 is stopped
     StopMotor(Module2_IN1, Module2_IN2, Module2_IN3, Module2_IN4); // Ensure Motor 2 is stopped
   }
